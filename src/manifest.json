@@ -1,0 +1,20 @@
+
+{
+  "manifest_version": 2,
+  "name": "music",
+  "version": "0.1.0",
+
+  "description": "view music website, inlcude: 163.music.com",
+
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.mozilla.org/*"],
+      "js": ["borderify.js"]
+    }
+  ]
+
+}

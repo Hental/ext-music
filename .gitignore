@@ -1,0 +1,19 @@
+# cache
+.DS_Store
+*~
+
+# 第三方包
+node_modules/
+
+# 编辑器配置文件
+.vscode/chrome
+
+# 日志
+log/
+*.log
+
+# compiler target
+dist/
+
+# other
+test/__coverage__
