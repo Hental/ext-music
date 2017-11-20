@@ -1,15 +1,11 @@
 
 (function main(factory) {
-  console.log('this is client');
+  console.log('this is music player client');
   factory();
 }(function factory() {  // eslint-disable-line
-  const option = {
-
-  };
-  const refs = {
-    pause: document.querySelector('#g_player a[data-action="play"]'),
-    play: document.querySelector('#g_player a[data-action="play"]'),
-    next: document.querySelector('#g_player a[data-action="next"]'),
+  const refs = {};
+  const state = {
+    isPause: false,
   };
 
   function addListener(target, listener) {
@@ -17,14 +13,37 @@
     target.addListener(listener);
   }
 
+  function setConfig(conf) {
+    Object.keys(conf.actionSelectors).forEach((key) => {
+      refs[key] = document.querySelector(conf.actionSelectors[key]);
+    });
+    state.isPause = conf.checkIsPaste(document);
+  }
+
+  function doAction(actionName) {
+    if (actionName === 'play/pause') {
+      state.isPause = !state.isPause;
+      refs['play/pause'].click();
+    } else {
+      const el = refs[actionName];
+      if (el) el.click();
+    }
+  }
+
   function listenMsg(msg) {
-    console.log('receive action:', msg);
-    const el = refs[msg.action];
-    if (el) el.click();
+    console.log('receive message:', msg);
+    const type = msg.type;
+    const val = msg.value;
+
+    if (type === 'action') {
+      doAction(val);
+    } else if (type === 'config') {
+      setConfig(val);
+    }
   }
 
   function listenConnect(port) {
-    console.log('connect extension');
+    console.log('client connect.');
     addListener(port.onMessage, listenMsg);
   }
 
