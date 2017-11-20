@@ -2,19 +2,35 @@
 {
   "manifest_version": 2,
   "name": "music",
+  "author": "LT",
   "version": "0.1.0",
-
   "description": "view music website, inlcude: 163.music.com",
-
   "icons": {
-    "48": "icons/icon-48.png"
+    "48": "icons/icon.svg"
   },
-
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "proxy",
+    "storage",
+    "*://douban.fm/*",
+    "*://music.163.com/*"
+  ],
+  "browser_action": {
+    "default_title": "music player choose",
+    "default_popup": "ui/popup.html",
+    "default_icon": {
+      "48": "icons/icon.svg"
+    }
+  },
+  "background": {
+    "page": "core/background.html"
+  },
   "content_scripts": [
     {
-      "matches": ["*://*.mozilla.org/*"],
-      "js": ["borderify.js"]
+      "matches": ["*://douban.fm/*"],
+      "js": ["core/content.js"],
+      "all_frames": true
     }
   ]
-
 }
