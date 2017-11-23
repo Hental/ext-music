@@ -1,11 +1,17 @@
 
 (function main(factory) {
   console.log('this is music player client');
-  factory();
-}(function factory() {  // eslint-disable-line
+  factory(siteConfigs);
+}(function factory(siteConfigs = {}) {  // eslint-disable-line
   const refs = {};
   const state = {
     isPause: false,
+    get isPlay() {
+      return !this.isPause;
+    },
+    set isPlay(v) {
+      this.isPause = !v;
+    },
   };
 
   function addListener(target, listener) {
@@ -13,21 +19,21 @@
     target.addListener(listener);
   }
 
-  function setConfig(conf) {
+  function setOption({ site }) {
+    const conf = siteConfigs[site];
     Object.keys(conf.actionSelectors).forEach((key) => {
       refs[key] = document.querySelector(conf.actionSelectors[key]);
     });
-    state.isPause = conf.checkIsPaste(document);
+    if (conf.initState) conf.initState(state, document);
   }
 
   function doAction(actionName) {
     if (actionName === 'play/pause') {
       state.isPause = !state.isPause;
-      refs['play/pause'].click();
-    } else {
-      const el = refs[actionName];
-      if (el) el.click();
     }
+
+    const el = refs[actionName];
+    if (el) el.click();
   }
 
   function listenMsg(msg) {
@@ -37,13 +43,13 @@
 
     if (type === 'action') {
       doAction(val);
-    } else if (type === 'config') {
-      setConfig(val);
+    } else if (type === 'option') {
+      setOption(val);
     }
   }
 
   function listenConnect(port) {
-    console.log('client connect.');
+    console.log('client connect.', port);
     addListener(port.onMessage, listenMsg);
   }
 

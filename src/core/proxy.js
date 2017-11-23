@@ -3,10 +3,6 @@
 }(function factory(siteConfigs) { // eslint-disable-line
   'use strict'; // eslint-disable-line
 
-  const option = {
-    site: 'music.163',
-  };
-
   const state = {
     tab: null,
     get tabId() {
@@ -15,121 +11,133 @@
 
     isExecuteScript: false,
     isSendClientConfig: false,
+  };
 
-    isPlay: true,
-    get isPause() {
-      return !this.isPlay;
-    },
-    set isPause(v) {
-      this.isPlay = !v;
-    },
+  const option = {
+    site: 'music.163',
   };
 
   const siteConfig = siteConfigs[option.site];
 
-  const error = (info) => (err) => {
+  const error = info => (err) => {
     console.error(info, err);
   };
 
-  const sendMessage = type => value => {
-    return browser.tabs.sendMessage(state.tabId, {
+  const sendMessage = type => value => (
+    browser.tabs.sendMessage(state.tabId, {
       type,
       value,
-    });
-  };
+    })
+  );
 
   const sendAction = sendMessage('action');
+  const sendOption = sendMessage('option');
 
-  function createNewTab(url, tabOpt) {
+  function resetTabState() {
+    state.tab = null;
+    state.isExecuteScript = false;
+    state.isSendClientConfig = false;
+  }
+
+  function createNewTab(url, tabOpt = {}) {
+    resetTabState();
     return browser.tabs.create(Object.assign({}, {
       url,
       index: 0,
       active: false,
     }, tabOpt)).then((tab) => {
       state.tab = tab;
+      return tab;
     });
+  }
+
+  function findAllTabs(url) {
+    return browser.tabs.query({ url });
+  }
+
+  function findTab(url) {
+    return findAllTabs(url).then(tabs => tabs[0]);
   }
 
   function executeScript() {
     state.isExecuteScript = true;
     return browser.tabs.executeScript(state.tabId, {
-      file: '/core/client.js',
-    });
-  }
-
-  function connectTab(tabId) {
-    state.isSendClientConfig = true;
-    return browser.tabs.connect(tabId, {});
+      file: '/core/data.js',
+      runAt: 'document_start',
+    }).then(() => (
+      browser.tabs.executeScript(state.tabId, {
+        file: '/core/client.js',
+        runAt: 'document_end',
+      })
+    ));
   }
 
   function sendClientConfig() {
     state.isSendClientConfig = true;
-    return sendMessage('config')(siteConfig);
-  }
-
-  function resetClientState() {
-    state.tab = null;
-    state.isExecuteScript = false;
-    state.isSendClientConfig = false;
+    return sendOption(option);
   }
 
   function initNewTab() {
-    resetClientState();
     return createNewTab(siteConfig.url, siteConfig.tabOption)
-      .then((tab) => {
-        state.tab = tab;
-        return executeScript(tab.id);
-      })
-      .then(() => {
-        state.isExecuteScript = true;
-        sendClientConfig();
-      })
-      .then(() => {
-        state.isSendClientConfig = true;
-      })
+      .then(() => executeScript())
+      .then(() => sendClientConfig())
       .catch(error('[init new tab error]:'));
   }
+
+  const runIfNot = (name, fn) => () => (
+    new Promise((res, rej) => {
+      if (!state[name]) {
+        fn().then(res).catch(rej);
+      } else {
+        res(state[name]);
+      }
+    })
+  );
 
   function checkTabIsExist() {
     return new Promise((res, rej) => {
       if (!state.tab) {
-        browser.tabs.query({ url: siteConfig.urlPattern }).then((tabs) => {
-          if (tabs.length === 0) {
-            resetClientState();
-            createNewTab(siteConfig.url, siteConfig.tabOption).then(res);
-          } else {
-            state.tab = tabs[0];
-            res(tabs[0]);
-          }
-        });
+        res(false);
       } else {
-        res(state.tab);
+        findAllTabs(siteConfig.urlPattern)
+          .then(tabs => tabs.filter(tab => tab.id === state.tabId))
+          .then(tabs => res(tabs.length > 0))
+          .catch(rej);
       }
     });
   }
 
-  function checkExecuteScript() {
-    return new Promise((res, rej) => {
-      if (!state.isExecuteScript) {
-        executeScript().then(res);
+  function getTab() {
+    return findTab(siteConfig.urlPattern)
+      .then(tab => tab || createNewTab(siteConfig.url, siteConfig.tabOption));
+  }
+
+  function checkTab() {
+    return checkTabIsExist().then((exist) => {
+      if (!exist) {
+        return getTab().then((tab) => {
+          state.tab = tab;
+          return tab;
+        });
       }
-      res();
+      return state.tab;
     });
   }
 
-  function checkClientConfig() {
-    return new Promise((res, rej) => {
-      if (!state.isSendClientConfig) {
-        sendClientConfig().then(res);
+  function initEvents() {
+    const tabRemoveListener = (tabId) => {
+      if (state.tabId === tabId) {
+        state.tab = null;
       }
-      res();
-    });
+    };
+
+    browser.tabs.onRemoved.addListener(tabRemoveListener);
   }
 
   function check() {
-    return checkTabIsExist()
-      .then(() => checkExecuteScript())
-      .then(() => checkClientConfig())
+    return checkTab()
+      .then(runIfNot('isExecuteScript', executeScript))
+      .then(runIfNot('isSendClientConfig', sendClientConfig))
       .catch(error('[check tab] error:'));
   }
 
@@ -150,4 +158,5 @@
   }
 
   listenMessage();
+  initEvents();
 }));

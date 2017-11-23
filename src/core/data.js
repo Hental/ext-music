@@ -8,7 +8,8 @@ const siteConfigs = {
       prev: '#g_player .btns a[data-action="prev"]',
       next: '#g_player .btns a[data-action="next"]',
     },
-    checkIsPaste: '!!document.querySelector(\'#g_player a[data-action="pause"]\')',
+    initState(state, doc) {
+      state.isPaste = !!doc.querySelector('#g_player a[data-action="pause"]');
+    },
   },
 };
-

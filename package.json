@@ -137,8 +137,17 @@
       "import/ignore": ["/\\.(scss|css)$/"]
     },
     "rules": {
-      "no-console": [1],
-      "import/extensions": [1, "never"]
+      "import/extensions": [1, "never"],
+
+      "no-console": [1, { "allow": ["warn", "error"] }],
+      "no-debugger": [1],
+
+      "no-var": [0],
+      "prefer-template": [1],
+      "prefer-rest-params": [1],
+      "no-param-reassign": [2, { "props": false }],
+      "prefer-destructuring": [1, { "array": false, "object": false }],
+      "prefer-arrow-callback": [1]
     }
   },
   "eslintIgnore": [
