@@ -8,7 +8,6 @@ process.on('unhandledRejection', err => {
 });
 
 const jest = require('jest');
-const config = require('../../config').test;
 const argv = process.argv.slice(2);
 
 // Watch unless in coverage mode

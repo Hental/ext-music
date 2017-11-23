@@ -14,6 +14,7 @@ log/
 
 # compiler target
 dist/
+src/web-ext-artifacts/
 
 # other
 test/__coverage__

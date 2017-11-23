@@ -1,106 +1,31 @@
 {
-	"name": "template",
-	"version": "0.0.1",
-	"private": true,
+	"name": "ext-music",
+	"version": "0.1.0",
 	"license": "MIT",
 	"scripts": {
-		"dev": "node script/task/dev.js",
-		"build": "node script/task/build.js",
-		"test": "node script/task/test.js --env=jsdom",
+    "dev": "cd src && web-ext run",
+    "clean": "rm -rf src/web-ext-artifacts",
+    "build": "yarn run clean && cd src && web-ext build",
+    "sign": "cd src && web-ext sign",
+    "test": "node script/test.js",
 		"test:coverage": "yarn run test --coverage",
 		"lint": "yarn run lint:script && yarn run lint:style",
 		"lint:script": "node_modules/.bin/eslint src/",
 		"lint:style": "node_modules/.bin/stylelint src/"
 	},
 	"dependencies": {
-		"jquery": "1.11.1"
 	},
 	"devDependencies": {
-		"autoprefixer": "^7.1.6",
-		"babel-core": "^6.26.0",
-		"babel-eslint": "^8.0.1",
-		"babel-jest": "^21.2.0",
-		"babel-loader": "^7.1.2",
-		"babel-plugin-transform-class-properties": "^6.24.1",
-		"babel-plugin-transform-object-rest-spread": "^6.26.0",
-		"babel-plugin-webpack-alias": "^2.1.2",
-		"babel-preset-env": "^1.6.0",
-		"case-sensitive-paths-webpack-plugin": "^2.1.1",
-		"css-loader": "^0.28.7",
 		"eslint": "^4.6.1",
 		"eslint-config-airbnb-base": "^12.0.0",
-		"eslint-friendly-formatter": "^3.0.0",
-		"eslint-loader": "^1.9.0",
 		"eslint-plugin-html": "^3.2.1",
 		"eslint-plugin-import": "^2.7.0",
 		"eslint-plugin-markdown": "^1.0.0-beta.6",
-		"extract-text-webpack-plugin": "^3.0.2",
-		"file-loader": "^1.1.5",
-		"friendly-errors-webpack-plugin": "^1.6.1",
-		"html-webpack-plugin": "^2.30.1",
 		"jest": "^21.2.1",
-		"jsdom": "^11.3.0",
-		"node-sass": "^4.5.3",
-		"opn": "^5.1.0",
-		"postcss": "^6.0.13",
-		"postcss-flexbugs-fixes": "^3.2.0",
-		"postcss-loader": "^2.0.8",
-		"sass-loader": "^6.0.6",
-		"style-loader": "^0.19.0",
 		"stylelint": "^8.2.0",
 		"stylelint-config-sass-guidelines": "^3.1.0",
 		"stylelint-config-standard": "^17.0.0",
-		"stylelint-scss": "^2.1.0",
-		"stylelint-webpack-plugin": "^0.9.0",
-		"url-loader": "^0.6.2",
-		"webpack": "^3.5.6",
-		"webpack-bundle-analyzer": "^2.9.0",
-		"webpack-dev-server": "^2.7.1",
-		"webpack-manifest-plugin": "^1.3.2",
-		"whatwg-fetch": "^2.0.3"
-  },
-  "babel": {
-    "plugins": [
-      "babel-plugin-transform-class-properties",
-      "babel-plugin-transform-object-rest-spread",
-      ["babel-plugin-webpack-alias", { "config": "./script/build/webpack.config.js" }]
-    ],
-    "env": {
-      "development": {
-        "presets": [
-          ["env", {
-            "targets": {
-              "browsers": ["last 5 Chrome versions"]
-            },
-            "debug": true,
-            "modules": false
-          }]
-        ],
-        "sourceMaps": "inline"
-      },
-      "production": {
-        "presets": [
-          ["env", {
-            "targets": {
-              "browsers": ["last 5 versions", "ie 9"]
-            },
-            "debug": true,
-            "modules": false
-          }]
-        ]
-      },
-      "test": {
-        "presets": [
-          ["env",{
-            "targets": {
-              "node": "current"
-            },
-            "debug": false
-          }]
-        ],
-        "sourceMaps": "inline"
-      }
-    }
+    "stylelint-scss": "^2.1.0"
   },
   "eslintConfig": {
     "root": true,
@@ -189,12 +114,12 @@
     ],
     "testMatch": [
       "<rootDir>/src/**/__tests__/*.js",
+      "<rootDir>/src/**/__test__/*.js",
       "<rootDir>/src/**/?(*.)(spec|test).js"
     ],
     "testEnvironment": "node",
     "testURL": "http://127.0.0.1",
     "transform": {
-      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
       "^.+\\.(css|scss)$": "<rootDir>/test/jest/cssTransform.js",
       "^(?!.*\\.(js|json|css|scss)$)": "<rootDir>/test/jest/fileTransform.js"
     },
